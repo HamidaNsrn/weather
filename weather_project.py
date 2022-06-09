@@ -472,6 +472,130 @@ def populate_fact_weather3(co_cursor, csv_path, table_name):
                                 WT03, WT03_ATTRIBUTES, WT05, WT05_ATTRIBUTES, WT07, WT07_ATTRIBUTES, WT08, WT08_ATTRIBUTES,
                                 WT09, WT09_ATTRIBUTES, WT16, WT16_ATTRIBUTES, WT18, WT18_ATTRIBUTES))
 
+def populate_fact_weather4(co_cursor, csv_path, table_name):
+    dataf = pd.read_csv(csv_path, sep=",", encoding='cp1252',  low_memory=False)
+    data = dataf.iloc[:,:]
+    data = data.drop_duplicates()
+
+
+    for index, row in data.iterrows():
+        sql = "INSERT INTO " + table_name + " (Date,station_id,PGTM,PGTM_ATTRIBUTES,PRCP,PRCP_ATTRIBUTES,SNOW," \
+                                            "SNOW_ATTRIBUTES,SNWD,SNWD_ATTRIBUTES, TAVG,TAVG_ATTRIBUTES,TMAX," \
+                                            "TMAX_ATTRIBUTES,TMIN,TMIN_ATTRIBUTES,WDFG,WDFG_ATTRIBUTES,WSFG," \
+                                            "WSFG_ATTRIBUTES,WT01,WT01_ATTRIBUTES,WT03,WT03_ATTRIBUTES,WT05," \
+                                            "WT05_ATTRIBUTES,WT07,WT07_ATTRIBUTES,WT08,WT08_ATTRIBUTES,WT09," \
+                                            "WT09_ATTRIBUTES,WT16,WT16_ATTRIBUTES)" \
+              "VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s," \
+                                            " %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) "
+        date_id = row[5]
+        if pd.isna(row[5]):
+            date_id = None
+        station_id = row[0]
+        if pd.isna(row[0]):
+            station_id = None
+        PGTM = row[6]
+        if pd.isna(row[6]):
+            PGTM = None
+        PGTM_ATTRIBUTES = row[7]
+        if pd.isna(row[7]):
+            PGTM_ATTRIBUTES = None
+        PRCP = row[8]
+        if pd.isna(row[8]):
+            PRCP = None
+        PRCP_ATTRIBUTES = row[9]
+        if pd.isna(row[9]):
+            PRCP_ATTRIBUTES = None
+        SNOW = row[10]
+        if pd.isna(row[10]):
+            SNOW = None
+        SNOW_ATTRIBUTES = row[11]
+        if pd.isna(row[11]):
+            SNOW_ATTRIBUTES = None
+        SNWD = row[12]
+        if pd.isna(row[12]):
+            SNWD = None
+        SNWD_ATTRIBUTES = row[13]
+        if pd.isna(row[13]):
+            SNWD_ATTRIBUTES = None
+        TAVG = row[14]
+        if pd.isna(row[14]):
+            TAVG = None
+        TAVG_ATTRIBUTES = row[15]
+        if pd.isna(row[15]):
+            TAVG_ATTRIBUTES = None
+        TMAX = row[16]
+        if pd.isna(row[16]):
+            TMAX = None
+        TMAX_ATTRIBUTES = row[17]
+        if pd.isna(row[17]):
+            TMAX_ATTRIBUTES = None
+        TMIN = row[18]
+        if pd.isna(row[18]):
+            TMIN = None
+        TMIN_ATTRIBUTES = row[19]
+        if pd.isna(row[19]):
+            TMIN_ATTRIBUTES = None
+        WDFG = row[20]
+        if pd.isna(row[20]):
+            WDFG = None
+        WDFG_ATTRIBUTES = row[21]
+        if pd.isna(row[21]):
+            WDFG_ATTRIBUTES = None
+        WSFG = row[22]
+        if pd.isna(row[22]):
+            WSFG = None
+        WSFG_ATTRIBUTES = row[23]
+        if pd.isna(row[23]):
+            WSFG_ATTRIBUTES = None
+        WT01 = row[24]
+        if pd.isna(row[24]):
+            WT01 = None
+        WT01_ATTRIBUTES = row[25]
+        if pd.isna(row[25]):
+            WT01_ATTRIBUTES = None
+        WT03 = row[26]
+        if pd.isna(row[26]):
+            WT03 = None
+        WT03_ATTRIBUTES = row[27]
+        if pd.isna(row[27]):
+            WT03_ATTRIBUTES = None
+        WT05 = row[28]
+        if pd.isna(row[28]):
+            WT05 = None
+        WT05_ATTRIBUTES = row[29]
+        if pd.isna(row[29]):
+            WT05_ATTRIBUTES = None
+        WT07 = row[30]
+        if pd.isna(row[30]):
+            WT07 = None
+        WT07_ATTRIBUTES = row[31]
+        if pd.isna(row[31]):
+            WT07_ATTRIBUTES = None
+        WT08 = row[32]
+        if pd.isna(row[32]):
+            WT08 = None
+        WT08_ATTRIBUTES = row[33]
+        if pd.isna(row[33]):
+            WT08_ATTRIBUTES = None
+        WT09 = row[34]
+        if pd.isna(row[34]):
+            WT09 = None
+        WT09_ATTRIBUTES = row[35]
+        if pd.isna(row[35]):
+            WT09_ATTRIBUTES = None
+        WT16 = row[36]
+        if pd.isna(row[36]):
+            WT16 = None
+        WT16_ATTRIBUTES = row[37]
+        if pd.isna(row[37]):
+            WT16_ATTRIBUTES = None
+
+        co_cursor.execute(sql, (date_id, station_id, PGTM, PGTM_ATTRIBUTES, PRCP, PRCP_ATTRIBUTES, SNOW,
+                                SNOW_ATTRIBUTES, SNWD, SNWD_ATTRIBUTES, TAVG, TAVG_ATTRIBUTES,TMAX, TMAX_ATTRIBUTES,
+                                TMIN, TMIN_ATTRIBUTES, WDFG, WDFG_ATTRIBUTES, WSFG, WSFG_ATTRIBUTES, WT01,
+                                WT01_ATTRIBUTES, WT03, WT03_ATTRIBUTES, WT05, WT05_ATTRIBUTES, WT07, WT07_ATTRIBUTES,
+                                WT08, WT08_ATTRIBUTES, WT09, WT09_ATTRIBUTES, WT16, WT16_ATTRIBUTES))
+
 
 # Connect to the database
 connection = pymysql.connect(host='127.0.0.1',
@@ -647,8 +771,8 @@ station19_path = "C:/Users/Hamida/Desktop/projet_Entrepot/Weather Data/Tunisia/W
 #populate_fact_weather1(cursor, station9_path, 'weather_fait')
 #populate_fact_weather1(cursor, station10_path, 'weather_fait')
 #populate_fact_weather1(cursor, station11_path, 'weather_fait')
-
-populate_fact_weather3(cursor, station13_path, 'weather_fait')
+populate_fact_weather4(cursor, station12_path, 'weather_fait')
+#populate_fact_weather3(cursor, station13_path, 'weather_fait')
 #populate_fact_weather1(cursor, station14_path, 'weather_fait')
 #populate_fact_weather1(cursor, station15_path, 'weather_fait')
 #populate_fact_weather2(cursor, station16_path, 'weather_fait')
