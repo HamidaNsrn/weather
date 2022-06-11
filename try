@@ -7,87 +7,16 @@ from datetime import datetime
 
 
 # Create a table following the given schema, if table exists it will be deleted
-def create_table(co_cursor, table_name, table_schema):
+def avg_tgva(co_cursor):
 
-    co_cursor.execute("SET FOREIGN_KEY_CHECKS = 0")
-    sql = "DROP TABLE IF EXISTS " + table_name
+#UPDATE weather_fait
+#SET weather_fait.TAVG = (weather_fait.TMAX+weather_fait.TMIN)/2
+#where weather_fait.TAVG is null
+
+    sql = "UPDATE weather_fait" \
+          " SET weather_fait.TAVG = (weather_fait.TMAX+weather_fait.TMIN)/2 " \
+          "where weather_fait.TAVG is null "
     co_cursor.execute(sql)
-    sql = "CREATE TABLE " + table_name + "(" + table_schema + ")"
-    co_cursor.execute("SET FOREIGN_KEY_CHECKS = 1")
-    co_cursor.execute(sql)
-
-
-def create_date_dim(co_cursor):
-    sql = "DROP TABLE IF EXISTS Date_dim"
-    co_cursor.execute(sql)
-    sql = "CREATE TABLE Date_dim (Date_ID VARCHAR(8), Date VARCHAR(10), Date_Name VARCHAR(10), Date_Name_Abbrev VARCHAR(3)," \
-          " Day_Of_Month INT(2), Date_Of_Week INT(1), Date_Of_Year INT(3), holiday_name VARCHAR(35), Is_Holiday VARCHAR(5)," \
-          "Is_Weekday VARCHAR(5), Is_Weekend VARCHAR(5), Month_Abbrev VARCHAR(3), Month_End_Flag VARCHAR(5), " \
-          "Month_Name VARCHAR(15), Month_Number INT(2), Quarter INT(1), Quarter_Name VARCHAR(6)," \
-          " Quarter_Short_Name VARCHAR(2), Same_Day_Previous_Year VARCHAR(10), Same_Day_Previous_Year_ID INT(8)," \
-          "Season VARCHAR(10), Week_Begin_Date VARCHAR(10), Week_Begin_Date_ID INT(8), Week_Num_In_Month INT(1)," \
-          "Week_Num_In_Year INT(2), Year INT(4), Year_And_Month VARCHAR(7), Year_And_Month_Abbrev VARCHAR(8), " \
-          "Year_And_Quarter VARCHAR(7), PRIMARY KEY (Date_ID))"
-    co_cursor.execute(sql)
-
-
-# Get the indices of a certain attribute type
-def get_attribute_type_index(schema, attribute_type):
-    row_splt = ","
-    ele_splt = " "
-
-    # Create a schema matrix, where the first column stores the attribute's name and the second its type
-    temp = schema.split(row_splt)
-    # Using list comprehension as shorthand
-    schema_matrix = [ele.split(ele_splt) for ele in temp]
-
-    # Get attributes' types list from schema_matrix
-    attributes_types = np.array(schema_matrix)[:, 1]
-
-    # Get all the indices of attributes of type 'attribute_type'
-    indices = [i for i, e in enumerate(attributes_types) if e.lower() == attribute_type.lower()]
-    return indices
-
-
-# Insert values into a table from a csv file
-def populate_table(co_cursor, csv_path, table_name, attributes):
-    data = pd.read_csv(csv_path, sep=",", encoding='cp1252')
-    data_indices = get_attribute_type_index(attributes, "DATE")
-    for index, row  in data.iterrows():
-        attribute_number = (row.size * '%s,')[:-1]
-        sql = "INSERT INTO " + table_name + "  VALUES (" + attribute_number + ")"
-        # convert data attributes to mysql format
-        if data_indices:
-            for date_index in data_indices:
-                row[date_index] = datetime.strptime(row[date_index], '%m/%d/%Y').date()
-
-        co_cursor.execute(sql,tuple(row))
-
-
-
-#afficher les tableaux
-def fetch_table(co_cursor, table_name):
-    sql3 = "SELECT * FROM " + table_name
-    co_cursor.execute(sql3)
-    myresult = co_cursor.fetchall()
-    return myresult
-
-def fetch_order_col(co_cursor, table_name):
-    sql3 = "SELECT order_ID, item_type, sales_channel, order_priority FROM " + table_name
-    co_cursor.execute(sql3)
-    myresult = co_cursor.fetchall()
-    return myresult
-def fetch_date_col(co_cursor, table_name):
-    sql3 = "SELECT order_date, ship_date FROM " + table_name
-    co_cursor.execute(sql3)
-    myresult = co_cursor.fetchall()
-    return myresult
-def fetch_sales_col(co_cursor, table_name):
-    sql3 = "SELECT units_sold, unit_price, unit_cost, total_revenue, total_cost FROM " + table_name
-    co_cursor.execute(sql3)
-    myresult = co_cursor.fetchall()
-    return myresult
-
 
 
 
@@ -95,57 +24,13 @@ def fetch_sales_col(co_cursor, table_name):
 connection = pymysql.connect(host='127.0.0.1',
                              user='root',
                              password='root',
-                             database='try',
+                             database='weather_datawarehouse',
                              charset='utf8mb4',
                              cursorclass=pymysql.cursors.DictCursor)
 cursor = connection.cursor()
 
-# Create tables
-cus_schema = '''
-   customers_ID INT(20) primary key,
-   customer_name TEXT(30),
-   country TEXT(20),
-   country_Iso VARCHAR(20),
-   region TEXT(20)
-'''
-sales_schema = '''
-   order_ID int(30) NOT NULL primary key,
-   customers_ID INT(20) ,
-   item_type VARCHAR(30),
-   sales_channel VARCHAR(20),
-   order_priority VARCHAR(5),
-   order_date DATE,
-   ship_date DATE,
-   units_sold INT(11),
-   unit_price FLOAT,
-   unit_cost FLOAT,
-   total_revenue FLOAT,
-   total_cost FLOAT
-'''
-create_table(cursor, "Customers", cus_schema) # TODO: déinir le bon schema de Customers
-#print("Table Customers created")
-create_table(cursor, "Sales", sales_schema) # TODO: déinir le bon schema de Sales
-#print("Table Sales created")
 
-# Populate tables
-cos_path = "C:/Users/Hamida/Desktop/activity1/Customers.csv"
-sale_path = "C:/Users/Hamida/Desktop/activity1/Sales.csv"
-populate_table(cursor, cos_path, 'Customers',
-              'customers_ID INT,customer_name TEXT,country TEXT,country_Iso VARCHAR,region TEXT') # TODO: renseigner chauqe attribut avec son type
-print("Table Customers populated")
-populate_table(cursor, sale_path, 'Sales', 'order_ID int,customers_ID INT,item_type VARCHAR,'
-                                                  'sales_channel VARCHAR,order_priority VARCHAR,order_date DATE,'
-                                                  'ship_date DATE,units_sold INT,unit_price FLOAT,unit_cost FLOAT,'
-                                                  'total_revenue FLOAT,total_cost FLOAT') # TODO: renseigner chauqe attribut avec son type
-print("Table Sales populated")
-
-
-#afficher les tables
-#for x in fetch_table(cursor, "Customers"):
-    #  print(x)
-#for x in fetch_table(cursor, "Sales"):
- #   print(x)
-
+avg_tgva(cursor)
 
 
 
